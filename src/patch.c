@@ -613,7 +613,8 @@ main (int argc, char **argv)
 	    if (fstat (fileno (rejfp), &rejst) != 0 || fclose (rejfp) != 0)
 	      write_fatal ();
 	    rejfp = NULL;
-	    somefailed = true;
+	    if (! somefailed && ! (applied && applied_is_cause))
+	      somefailed = true;
 	    say ("%d out of %d hunk%s %s", failed, hunk, "s" + (hunk == 1),
 		 skip_rest_of_patch ? "ignored" : "FAILED");
 	    if (outname && (! rejname || strcmp (rejname, "-") != 0)) {
@@ -629,7 +630,7 @@ main (int argc, char **argv)
 		      rej[len - 1] = '#';
 		    simple_backup_suffix = s;
 		}
-		if (! dry_run)
+		if (! dry_run && ! (applied && applied_is_cause))
 		  {
 		    say (" -- saving rejects to file %s\n", quotearg (rej));
 		    if (rejname)
@@ -708,7 +709,7 @@ reinitialize_almost_everything (void)
     skip_rest_of_patch = false;
 }
 
-static char const shortopts[] = "bB:cd:D:eEfF:g:i:l"
+static char const shortopts[] = "abB:cd:D:eEfF:g:i:l"
 #if 0 && defined ENABLE_MERGE
 				"m"
 #endif
@@ -716,6 +717,7 @@ static char const shortopts[] = "bB:cd:D:eEfF:g:i:l"
 
 static struct option const longopts[] =
 {
+  {"applied", no_argument, NULL, 'a'},
   {"backup", no_argument, NULL, 'b'},
   {"prefix", required_argument, NULL, 'B'},
   {"context", no_argument, NULL, 'c'},
@@ -777,6 +779,7 @@ static char const *const option_help[] =
 "",
 "  -N  --forward  Ignore patches that appear to be reversed or already applied.",
 "  -R  --reverse  Assume patches were created with old and new files swapped.",
+"  -a  --applied  Ignore error and save no rejects on applied or reversed patch.",
 "",
 "  -i PATCHFILE  --input=PATCHFILE  Read patch from PATCHFILE instead of stdin.",
 "",
@@ -869,6 +872,9 @@ get_some_switches (void)
     while ((optc = getopt_long (Argc, Argv, shortopts, longopts, (int *) 0))
 	   != -1) {
 	switch (optc) {
+	    case 'a':
+		applied = true;
+		break;
 	    case 'b':
 		make_backups = true;
 		 /* Special hack for backward compatibility with CVS 1.9.

@@ -1056,6 +1056,7 @@ ok_to_reverse (char const *format, ...)
     {
       say ("  Skipping patch.\n");
       skip_rest_of_patch = true;
+      applied_is_cause = true;
     }
   else if (force)
     {
@@ -1079,6 +1080,7 @@ ok_to_reverse (char const *format, ...)
 	      if (verbosity != SILENT)
 		say ("Skipping patch.\n");
 	      skip_rest_of_patch = true;
+	      applied_is_cause = true;
 	    }
 	}
     }
