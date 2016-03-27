@@ -707,6 +707,7 @@ reinitialize_almost_everything (void)
 
     reverse = reverse_flag_specified;
     skip_rest_of_patch = false;
+    applied_is_cause = false;
 }
 
 static char const shortopts[] = "abB:cd:D:eEfF:g:i:l"
